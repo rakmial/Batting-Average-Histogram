@@ -1,0 +1,143 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN">
+<html>
+  <body>
+    <title>Batting Averages</title>
+    <style>
+      .d3-tip {
+        line-height: 0.5;
+        font-variant: small-caps;
+        font-size: 12pt;
+        padding: 12px;
+        background: rgba(0, 0, 0, 0.8);
+        color: #fff;
+        border-radius: 1px;
+      }
+      .bar rect {
+        fill: steelblue;
+        shape-rendering: crispEdges;
+      }
+      .bar rect:hover{
+        fill: rgba(0,0,0,.8);
+      }
+      .axis path, .axis line {
+        fill: none;
+        stroke: #000;
+        shape-rendering: crispEdges;
+      }
+    </style>
+    <script src="http://d3js.org/d3.v3.min.js"></script>
+    <script src="http://labratrevenge.com/d3-tip/javascripts/d3.tip.v0.6.3.js">
+    </script>
+    <script>
+function parser(d) {
+    d.pavg = +d.avg;
+    return d;
+}
+
+function avghist(csvdata) {
+    var binsize = 0.005;
+    var minbin = 0;
+    var maxbin = 0.35;
+    var numbins = (maxbin - minbin) / binsize;
+
+    var margin = {top: 10, right: 30, bottom: 50, left: 60};
+    var width = 1000 - margin.left - margin.right;
+    var height = 1000 - margin.top - margin.bottom;
+
+    histdata = new Array(numbins);
+    for (var i = 0; i < numbins; i++) {
+		histdata[i] = { numfill: 0, meta: "" };
+	}
+
+    csvdata.forEach(function(d) {
+		var bin = Math.floor((d.pavg - minbin) / binsize);
+		if ((bin.toString() != "NaN") && (bin < histdata.length)) {
+			histdata[bin].numfill += 1;
+			histdata[bin].meta += "<tr><td>" + d.name +
+				"</td><td>" +
+				d.pavg.toFixed(3) + " Batting Avg.</td></tr>";
+		}
+    });
+
+    var x = d3.scale.linear()
+	  .domain([minbin, maxbin])
+	  .range([0, width]);
+
+    var y = d3.scale.linear()
+	  .domain([0, d3.max(histdata, function(d) {
+						return d.numfill;
+						})])
+	  .range([height, 0]);
+
+    var xAxis = d3.svg.axis()
+	  .scale(x)
+	  .orient("bottom");
+    var yAxis = d3.svg.axis()
+	  .scale(y)
+	  .ticks(10)
+	  .orient("left");
+
+    var tip = d3.tip()
+	  .attr('class', 'd3-tip')
+	  .direction('e')
+	  .offset([0, 20])
+	  .html(function(d) {
+	    return '<table id="tiptable">' + d.meta + "</table>";
+	});
+
+    var svg = d3.select("#avg").append("svg")
+	  .attr("width", width + margin.left + margin.right)
+	  .attr("height", height + margin.top + margin.bottom)
+	  .append("g")
+	  .attr("transform", "translate(" + margin.left + "," +
+						margin.top + ")");
+
+    svg.call(tip);
+
+    var bar = svg.selectAll(".bar")
+	  .data(histdata)
+	  .enter().append("g")
+	  .attr("class", "bar")
+	  .attr("transform", function(d, i) { return "translate(" +
+	       x(i * binsize + minbin) + "," + y(d.numfill) + ")"; })
+	  .on('mouseover', tip.show)
+	  .on('mouseout', tip.hide);
+
+    bar.append("rect")
+	  .attr("x", 0)
+	  .attr("width", x(binsize))
+	  .attr("height", function(d) { return height - y(d.numfill); });
+
+    svg.append("g")
+	  .attr("class", "x axis")
+	  .attr("transform", "translate(0," + height + ")")
+	  .call(xAxis);
+    svg.append("text")
+	  .attr("class", "xlabel")
+	  .attr("text-anchor", "middle")
+	  .attr("x", width / 2)
+	  .attr("y", height + margin.bottom)
+	  .text("BATTING AVERAGE");
+
+    svg.append("g")
+	  .attr("class", "y axis")
+	  .attr("transform", "translate(0,0)")
+	  .call(yAxis);
+    svg.append("text")
+	  .attr("class", "ylabel")
+	  .attr("y", 0 - margin.left)
+	  .attr("x", 0 - (height / 2))
+	  .attr("dy", "1em")
+	  .attr("transform", "rotate(-90)")
+	  .style("text-anchor", "middle")
+	  .text("NUMBER OF PLAYERS");
+}
+
+d3.csv("nozerobaseball.csv", parser,
+       function(error, csvdata) {
+	   avghist(csvdata);
+});
+    </script>
+    <div id="avg" class="graph"></div>
+  </body>
+</html>
