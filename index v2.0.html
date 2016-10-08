@@ -1,0 +1,127 @@
+<html>
+<div id="chartContainer">
+  <script src="http://d3js.org/d3.v3.min.js"></script>
+  <script src="http://dimplejs.org/dist/dimple.v2.2.0.min.js"></script>
+
+  <h2> Where Lefties Reign </h2>
+  <p> Baseball fans know that left-handed batters net some of the best batting averages in the game.<br>
+    Height has an effect on batting average, too - but a much greater effect on home runs.<br>
+    Explore this plot to learn more!</p>
+
+  <script type="text/javascript">
+    var svg = dimple.newSvg("#chartContainer", 950, 700);
+
+      d3.csv("/bbsummaries.csv",function (data) {
+        dimple.filterData(data,"handedness",["L","R"]);
+
+        var summarycontrol = new dimple.chart(svg,data);
+
+        var defaultColor = summarycontrol.defaultColors[0];
+        var selectedColor = summarycontrol.defaultColors[2];
+        var framerate = 3000;
+        var firstTick = true;
+
+        summarycontrol.setBounds(210,655,55,40);
+        var s1 = summarycontrol.addCategoryAxis("y","summary.type");
+        var s2 = summarycontrol.addMeasureAxis("x","summary.type");
+        s2.hidden = true;
+        var t = summarycontrol.addSeries("summary.type",dimple.plot.bar);
+        t.addEventHandler("click", onClick);
+        t.getTooltipText = function (e) {
+          return [
+            "Display " + e.aggField[0]
+          ]
+        }
+
+        summarycontrol.draw();
+
+        s1.titleShape.remove();
+        s1.shapes.selectAll("line,path").remove();
+        s1.shapes.selectAll("text")
+          .style("text-anchor", "start")
+          .style("font-size", "10px")
+          .attr("transform","translate(18,0.5)");
+
+        t.shapes
+          .attr("rx", 3)
+          .attr("ry", 3)
+          .style("fill", function (d) { return (d.s1 === 'median' ? selectedColor.fill : defaultColor.fill) })
+          .style("stroke", function (d) { return (d.s1 === 'median' ? selectedColor.stroke : defaultColor.stroke) })
+          .style("opacity", 0.4);
+
+
+        var myChart = new dimple.chart(svg, data);
+        myChart.setBounds(60, 30, 800, 600);
+
+        var x = myChart.addCategoryAxis("x", ["height","handedness"]);
+        var y1 = myChart.addMeasureAxis("y", "avg");
+        var y2 = myChart.addMeasureAxis("y","HR");
+
+        var a = myChart.addSeries("handedness",dimple.plot.bar,[x,y1]);
+        var l = myChart.addSeries("handedness",dimple.plot.line,[x,y2]);
+        var myLegend = myChart.addLegend(72, 660, 50, 100, "Left");
+        var story = myChart.setStoryboard("summary.type");
+        story.frameDuration = framerate;
+
+        myChart.draw();
+
+        myChart.legends = [];
+
+        function onClick(e) {
+          story.pauseAnimation();
+          if (e.yValue === story.getFrameValue()) {
+            story.startAnimation();
+          } else {
+            story.goToFrame(e.yValue);
+            story.pauseAnimation();
+          }
+        }
+
+        function onTick(e) {
+          if (!firstTick) {
+            s.shapes
+              .transition()
+              .duration(frame/2)
+              .style("fill", function (d) { return (d.s1 === e ? selectedColor.fill : defaultColor.fill) })
+              .style("stroke", function (d) { return (d.s1 === e ? selectedColor.stroke : defaultColor.stroke) });
+          }
+          firstTick = false;
+        }
+
+        svg.selectAll("title_text")
+          .data(["| Click legend to","| select handedness","| or summary type"])
+          .enter()
+          .append("text")
+            .attr("x", 110)
+            .attr("y", function (d, i) { return 667 + i * 12; })
+            .style("font-family", "sans-serif")
+            .style("font-size", "10px")
+            .style("color", "Black")
+            .text(function (d) { return d; });
+
+        var filterValues = dimple.getUniqueValues(data, "handedness");
+        myLegend.shapes.selectAll("rect")
+          .on("click", function (e) {
+            var hide = false;
+            var newFilters = [];
+            filterValues.forEach(function (f) {
+              if (f === e.aggField.slice(-1)[0]) {
+                hide = true;
+              } else {
+                newFilters.push(f);
+              }
+            });
+            if (hide) {
+              d3.select(this).style("opacity", 0.5);
+            } else {
+              newFilters.push(e.aggField.slice(-1)[0]);
+              d3.select(this).style("opacity", 0.9);
+            }
+            filterValues = newFilters;
+            myChart.data = dimple.filterData(data, "handedness", filterValues);
+            myChart.draw(800);
+          });
+    });
+  </script>
+</div>
+</html>

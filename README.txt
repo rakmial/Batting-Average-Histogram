@@ -1,20 +1,18 @@
 ***
 SUMMARY-----
 
-This interactive histogram demonstrates the distribution of batting averages across a dataset of 1,157 baseball players, displaying only those players with an average greater than zero. A baseball player's batting average is the ratio of pitches hit against total pitches thrown to them, naturally resulting in a ratio from 0 (has never hit any pitch thrown) to 1 (hits every pitch thrown). The histogram exposes the number of players that fall into each bin of width .005. Mousing over bins activates a tooltip listing the names and batting averages of players contained within the bin.
+This interactive and animated plot shows a number of summary statistics based on the individual statistics of a number of baseball players. The graph shows left-handed players to consistently outperform right-handed players across different heights at batting average as well as home runs, though home runs seem to be affected more by the player's height.
 
 ***
 DESIGN -----
 
-The first important design decision to be made involved players with a 0.000 batting average. Nearly 23% of observations had this value. When I first made my histogram, the 0.00 batting average observations ruined the scale of the chart - the y-axis must be stretched greatly to show the bin of magnitude 266, and entirety of non-zero observations fit into a domain between 0.066 and 0.328, leaving a great white gap between 0.000 and 0.066.
+The first important design decision to be made involved players with a 0.000 batting average. Nearly 23% of observations had this value. When I first made my plot as a histogram, the 0.00 batting average observations ruined the scale of the chart - the y-axis must be stretched greatly to show the bin of magnitude 266, and entirety of non-zero observations fit into a domain between 0.066 and 0.328, leaving a great white gap between 0.000 and 0.066.
 
 It was possible to design the story around this feature of the data - the fact that more than a fifth of the players in the dataset had never hit a single pitch is interesting, but it wasn't a story I was interested in telling. Using R to subset the data, I removed observations of players with a batting average of 0.000.
 
-The next design decision came with the scale of the axes. The y-axis required some decision on whether to use a linear or log scale D3 object - the data is so centralized that a logarithmic scale might seem necessary. The x-axis required a decision with regard to empty space - technically, the x-axis could extend to 1.0 even though the highest observation was 0.328.
+I also decided to remove outlier heights, below 68 and above 76, because they did not feature enough information about left-handed players to make the summary statistics rigorous (ie, the "67 L median" summary entry only featured two players, one that hit 228 home runs and another that hit zero). 
 
-I chose to keep the scale linear but curtail the x-axis to 0.35. I found this gave the most intuitive shaping of the histogram to the data - highly normal with a gentle left skew.
-
-I found that this shape of the chart naturally leads to exploration of the extremes - the smallest and greatest values, both of batting average and number of players. Dean Chance and Rod Carew are, in a sense, the stars of this story, having the maximum and minimum batting averages, but the wall of players with averages between 0.250 and 0.255 form another narrative character in the chart - the fulcrum.
+After cleaning the data, I realized that I had two categorical variables and two continuous variables that I wanted to explore. Finding a plot that would allow me to explore these variables without making it look busy or unnecessarily complicated was difficult, but eventually I settled on a double y-axis design that was fairly elegant.
 
 ***
 FEEDBACK -----
@@ -23,11 +21,57 @@ My next changes were made after receiving feedback from roommates. They noted th
 
 I was pleased that my roommates had a similar experience with the chart as I did, wondering aloud who Dean Chance and Rod Carew were. Luckily, I had already read their wikis and could tell them. However, that kind of narrative guiding would work well paired with an article about batting averages, particularly if they specifically mentioned Chance and Carew.
 
+For the third revision of my graphic, I responded to feedback from a Udacity coach, adding some explanatory text to the chart. The text includes specific mention of maximum and minimum values as well as context for understanding the information's distribution.
+
+I sought more feedback by asking for three friends to criticize the chart on Facebook, sharing it using Gist and Bl.Ocks.org. I shared my third version with explanatory text. The following feedback is copied from our conversations and are formatted as responses to the following five questions -
+
+What do you notice in the visualization?
+What questions do you have about the data?
+What relationships do you notice?
+What do you think is the main takeaway from this visualization?
+Is there something you don’t understand in the graphic?
+
+
+Feedback #1 - Alex (Web developer, mathematician) ---
+
+1. It's a bell curve distribution around .25 for the most part with a tail or bumps at lower averages, presumably as a result of players who are highly specialized in areas besides batting.
+
+2. What's the breakdown of each batting average bin by player position? It would be interesting to see e.g. where pitchers cluster. What are some other details about the represented dataset? Which players from what time period are represented? This would be good information to put in a title/subtitle, in addition to the descriptive paragraph that's already there.
+
+3. The bell curve distribution of batting averages. Besides distribution, it's hard to find relationships in a simple histogram.
+
+4. That batting averages are distributed around ~0.25, and even the best are only ~0.3.
+
+5. I guess I don't quite understand how the graphic demonstrates the claim that the margin between great and mediocre is razor thin. What is considered a great vs mediocre batting average? I guess the bell curve is fairly narrow - the graphic or the text could do more to point this out.
+
+Feedback #2 - Elizabeth (Writer) ---
+
+1. the visualization reminds me of a bell curve.
+
+2. The paragraph reads like gibberish to me since I find batting averages confusing as all hell.
+
+3.the relationship seems to be that the data is correlating batting averages with number of players
+or connecting them
+
+4. that most players have a 0.25 batting average, and it's rare to go above or below that (more rare to go above)
+
+5. I think the title for the y axis could be a little clearer. It might just be my silly brain, but I thought number of players at first meant number of players on the team, rather than number of players in the American League (but that could be because it's 4am and I could very well have misread your paragraphs)
+
+Feedback #3 - Joshua (Actual baseball fan) ---
+
+1. the graph is crazy high and requires me to scroll down to see the whole thing and with the monitor at my work (21") i cant see it all in a single image, its very blocky not a complaint just stating its blocky ( not modern?)
+
+2. what years are the players from? do batting averages differ from year to year? what was the average players average vs the people listed. 
+
+3. uhhh ther eis a lot of .250 hitters?  so 1-4 must be league average? 
+
+4. hitting is hard and 1/4 is good enough 
+
+5. how did rod carew get such a good average / is it the best ever?
+
+After these feedbacks, I changed the design fairly radically to the two-axis bar/line graph now presented.
+
 ***
 RESOURCES -----
 
-I must first and foremost acknowledge the guidance I found in Frank Cleary's personal website. I knew the type of chart I wanted to create, but I wasn't yet sure how I wanted to make it interactive. His histogram tracking the distribution of average MPG for his Prius formed much of the heart of my own chart as well as the inspiration to use the tooltip package. A few of his works may be found at:
-
-http://www.frankcleary.com/mpg/ 
-
-I used a number of resources for this project - they are listed in a separate references file.
+Most of the information that I used to finish this plot came directly from advanced examples on the Dimple.js website. These resources are listed in the references file.

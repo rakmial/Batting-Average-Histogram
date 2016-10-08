@@ -3,9 +3,8 @@ http://kyleschaeffer.com/development/css-font-size-em-vs-px-vs-pt-vs/
 https://css-tricks.com/almanac/properties/l/line-height/
 https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number/toFixed
 http://labratrevenge.com/d3-tip/javascripts/d3.tip.v0.6.3.js
-
---- AND ESPECIALLY ---
-
+https://www.dashingd3js.com/svg-text-element
 http://www.frankcleary.com/making-an-interactive-histogram-in-d3-js/
-
------
+http://dimplejs.org/advanced_examples_viewer.html?id=advanced_storyboard_control
+http://dimplejs.org/advanced_examples_viewer.html?id=advanced_interactive_legends
+http://dimplejs.org/adhoc_viewer.html?id=adhoc_bar_custom_tooltips
