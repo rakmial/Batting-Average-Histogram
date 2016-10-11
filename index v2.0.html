@@ -9,18 +9,21 @@
     Explore this plot to learn more!</p>
 
   <script type="text/javascript">
+    // Create the container SVG for the chart and the legends
     var svg = dimple.newSvg("#chartContainer", 950, 700);
 
+      // Read in data, filter by handedness
       d3.csv("/bbsummaries.csv",function (data) {
         dimple.filterData(data,"handedness",["L","R"]);
 
+        //initialize variables for interactive summary control legend
         var summarycontrol = new dimple.chart(svg,data);
-
         var defaultColor = summarycontrol.defaultColors[0];
         var selectedColor = summarycontrol.defaultColors[2];
         var framerate = 3000;
         var firstTick = true;
 
+        //Create interactive summary control legend
         summarycontrol.setBounds(210,655,55,40);
         var s1 = summarycontrol.addCategoryAxis("y","summary.type");
         var s2 = summarycontrol.addMeasureAxis("x","summary.type");
@@ -35,13 +38,13 @@
 
         summarycontrol.draw();
 
+        //Eliminate axes and lines in order to make graph look like legend
         s1.titleShape.remove();
         s1.shapes.selectAll("line,path").remove();
         s1.shapes.selectAll("text")
           .style("text-anchor", "start")
           .style("font-size", "10px")
           .attr("transform","translate(18,0.5)");
-
         t.shapes
           .attr("rx", 3)
           .attr("ry", 3)
@@ -49,14 +52,13 @@
           .style("stroke", function (d) { return (d.s1 === 'median' ? selectedColor.stroke : defaultColor.stroke) })
           .style("opacity", 0.4);
 
-
+        //Create actual bar and line plot, start handedness legend and storyboard
         var myChart = new dimple.chart(svg, data);
-        myChart.setBounds(60, 30, 800, 600);
 
+        myChart.setBounds(60, 30, 800, 600);
         var x = myChart.addCategoryAxis("x", ["height","handedness"]);
         var y1 = myChart.addMeasureAxis("y", "avg");
         var y2 = myChart.addMeasureAxis("y","HR");
-
         var a = myChart.addSeries("handedness",dimple.plot.bar,[x,y1]);
         var l = myChart.addSeries("handedness",dimple.plot.line,[x,y2]);
         var myLegend = myChart.addLegend(72, 660, 50, 100, "Left");
@@ -65,6 +67,7 @@
 
         myChart.draw();
 
+        //Orphan the legend, create onClick and onTick functions for storyboard control
         myChart.legends = [];
 
         function onClick(e) {
@@ -99,6 +102,7 @@
             .style("color", "Black")
             .text(function (d) { return d; });
 
+        //Allows the legend to filter data by handedness
         var filterValues = dimple.getUniqueValues(data, "handedness");
         myLegend.shapes.selectAll("rect")
           .on("click", function (e) {
